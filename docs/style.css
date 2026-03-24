@@ -1,0 +1,8 @@
+body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #f5f7fb; }
+.container { max-width: 900px; margin: 0 auto; background: white; padding: 24px; border-radius: 12px; }
+.search-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+.search-bar input { flex: 1; padding: 10px; }
+.search-bar button, .add-btn, #clearLogBtn, .remove-btn { padding: 10px 12px; cursor: pointer; }
+.results > div { border: 1px solid #ddd; padding: 16px; border-radius: 10px; margin-bottom: 14px; background: #fafafa; }
+.tags { margin: 10px 0; }
+.tags span { display: inline-block; margin-right: 6px; padding: 4px 8px; background: #e6efff; border-radius: 999px; }

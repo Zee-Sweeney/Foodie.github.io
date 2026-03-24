@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Recipe Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Recipe Finder</h1>
+    <div class="search-bar">
+      <input id="ingredients" type="text" placeholder="chicken, rice, tomato">
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <div id="message"></div>
+    <div id="providedTags" class="tags"></div>
+    <div id="results" class="results"></div>
+
+    <h2>Today's Calorie Log</h2>
+    <div>Total Calories: <span id="totalCalories">0</span></div>
+    <ul id="logEntries"></ul>
+    <button id="clearLogBtn">Clear Today’s Log</button>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
