@@ -1,4 +1,4 @@
-const API_BASE = "https://YOUR-RENDER-URL.onrender.com";
+const API_BASE = "https://recipe-finder-api-qz2y.onrender.com";
 
 function todayKey() {
   const now = new Date();
