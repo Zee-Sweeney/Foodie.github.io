@@ -8,20 +8,52 @@
 </head>
 <body>
   <div class="container">
-    <h1>Recipe Finder</h1>
-    <div class="search-bar">
-      <input id="ingredients" type="text" placeholder="chicken, rice, tomato">
-      <button id="searchBtn">Search</button>
-    </div>
+    <header class="topbar">
+      <div>
+        <h1>Recipe Finder</h1>
+        <p class="subtitle">Search recipes by the ingredients you already have.</p>
+      </div>
+      <nav class="nav-links">
+        <a class="nav-link active" href="./index.html">Recipe Finder</a>
+        <a class="nav-link" href="./tracker.html">Full Calorie Tracker</a>
+      </nav>
+    </header>
 
-    <div id="message"></div>
-    <div id="providedTags" class="tags"></div>
-    <div id="results" class="results"></div>
+    <section class="panel">
+      <h2>Your Ingredients</h2>
 
-    <h2>Today's Calorie Log</h2>
-    <div>Total Calories: <span id="totalCalories">0</span></div>
-    <ul id="logEntries"></ul>
-    <button id="clearLogBtn">Clear Today’s Log</button>
+      <div class="ingredient-entry">
+        <input id="ingredientInput" type="text" placeholder="Add one ingredient">
+        <button id="addIngredientBtn">Add</button>
+        <button id="clearIngredientsBtn" class="secondary-btn">Clear All</button>
+      </div>
+
+      <div id="ingredientMessage" class="message"></div>
+      <div id="ingredientChips" class="chips"></div>
+
+      <div class="search-actions">
+        <button id="searchBtn">Search Recipes</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Today's Quick Tracker</h2>
+      <div class="log-summary">Total Calories Today: <span id="todayCalories">0</span></div>
+      <div class="log-summary">Goal: <span id="todayGoal">Not set</span></div>
+      <div class="log-summary">Status: <span id="todayStatus">No goal set</span></div>
+      <ul id="todayLogEntries" class="log-list"></ul>
+      <div class="tracker-link-wrap">
+        <a class="nav-link inline-link" href="./tracker.html">Open full tracker</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div id="message" class="message"></div>
+      <div id="providedTags" class="tags"></div>
+
+      <h2>Recipes</h2>
+      <div id="results" class="results"></div>
+    </section>
   </div>
 
   <script src="./script.js"></script>
