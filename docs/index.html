@@ -23,21 +23,25 @@
       <h2>Your Ingredients</h2>
 
       <div class="ingredient-entry">
-        <input id="ingredientInput" type="text" placeholder="Add one ingredient">
-        <button id="addIngredientBtn">Add</button>
-        <button id="clearIngredientsBtn" class="secondary-btn">Clear All</button>
+        <input
+          id="ingredientsInput"
+          type="text"
+          placeholder="Example: chicken, rice, tomato, onion"
+        >
+        <button id="addIngredientsBtn" type="button">Add Ingredients</button>
+        <button id="clearIngredientsBtn" type="button" class="secondary-btn">Clear Ingredients</button>
       </div>
 
       <div id="ingredientMessage" class="message"></div>
       <div id="ingredientChips" class="chips"></div>
 
       <div class="search-actions">
-        <button id="searchBtn">Search Recipes</button>
+        <button id="searchBtn" type="button">Search Recipes</button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>Today's Quick Tracker</h2>
+      <h2>Today's Daily Tracker</h2>
       <div class="log-summary">Total Calories Today: <span id="todayCalories">0</span></div>
       <div class="log-summary">Goal: <span id="todayGoal">Not set</span></div>
       <div class="log-summary">Status: <span id="todayStatus">No goal set</span></div>

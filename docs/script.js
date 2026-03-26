@@ -1,4 +1,4 @@
-const API_BASE = "https://recipe-finder-api-qz2y.onrender.com";
+const API_BASE = "https://your-render-service.onrender.com";
 
 function todayKey() {
   const now = new Date();
@@ -25,23 +25,34 @@ function ingredientsKey() {
   return "recipe-search-ingredients";
 }
 
+function loadJson(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveJson(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
 function loadLog() {
-  const raw = localStorage.getItem(todayKey());
-  return raw ? JSON.parse(raw) : [];
+  return loadJson(todayKey(), []);
 }
 
 function saveLog(entries) {
-  localStorage.setItem(todayKey(), JSON.stringify(entries));
+  saveJson(todayKey(), entries);
   saveTodayToHistory();
 }
 
 function loadHistory() {
-  const raw = localStorage.getItem(historyKey());
-  return raw ? JSON.parse(raw) : {};
+  return loadJson(historyKey(), {});
 }
 
 function saveHistory(history) {
-  localStorage.setItem(historyKey(), JSON.stringify(history));
+  saveJson(historyKey(), history);
 }
 
 function loadGoal() {
@@ -53,34 +64,31 @@ function saveGoal(goal) {
 }
 
 function loadProfile() {
-  const raw = localStorage.getItem(profileKey());
-  return raw ? JSON.parse(raw) : { name: "" };
+  return loadJson(profileKey(), { name: "" });
 }
 
 function saveProfile(profile) {
-  localStorage.setItem(profileKey(), JSON.stringify(profile));
+  saveJson(profileKey(), profile);
 }
 
 function loadSavedRecipes() {
-  const raw = localStorage.getItem(savedRecipesKey());
-  return raw ? JSON.parse(raw) : [];
+  return loadJson(savedRecipesKey(), []);
 }
 
 function saveSavedRecipes(recipes) {
-  localStorage.setItem(savedRecipesKey(), JSON.stringify(recipes));
+  saveJson(savedRecipesKey(), recipes);
 }
 
 function loadIngredients() {
-  const raw = localStorage.getItem(ingredientsKey());
-  return raw ? JSON.parse(raw) : [];
+  return loadJson(ingredientsKey(), []);
 }
 
 function saveIngredients(ingredients) {
-  localStorage.setItem(ingredientsKey(), JSON.stringify(ingredients));
+  saveJson(ingredientsKey(), ingredients);
 }
 
 function caloriesToNumber(value) {
-  const match = String(value).match(/\d+/);
+  const match = String(value || "").match(/\d+/);
   return match ? Number(match[0]) : 0;
 }
 
@@ -117,15 +125,97 @@ function saveTodayToHistory() {
   saveHistory(history);
 }
 
+function renderIngredients() {
+  const chipsEl = document.getElementById("ingredientChips");
+  if (!chipsEl) return;
+
+  const ingredients = loadIngredients();
+  chipsEl.innerHTML = "";
+
+  if (!ingredients.length) {
+    chipsEl.innerHTML = "<p>No ingredients added yet.</p>";
+    return;
+  }
+
+  ingredients.forEach((ingredient, index) => {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.innerHTML = `
+      <span>${escapeHtml(ingredient)}</span>
+      <button type="button" class="remove-chip-btn" data-index="${index}">×</button>
+    `;
+    chipsEl.appendChild(chip);
+  });
+
+  chipsEl.querySelectorAll(".remove-chip-btn").forEach(button => {
+    button.addEventListener("click", () => {
+      const ingredients = loadIngredients();
+      ingredients.splice(Number(button.dataset.index), 1);
+      saveIngredients(ingredients);
+      renderIngredients();
+    });
+  });
+}
+
+function addIngredientsFromInput() {
+  const input = document.getElementById("ingredientsInput");
+  const message = document.getElementById("ingredientMessage");
+
+  if (!input || !message) return;
+
+  const raw = input.value.trim();
+  if (!raw) {
+    message.textContent = "Enter at least one ingredient.";
+    return;
+  }
+
+  const newItems = raw
+    .split(",")
+    .map(item => item.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (!newItems.length) {
+    message.textContent = "Enter at least one ingredient.";
+    return;
+  }
+
+  const current = loadIngredients();
+  const merged = [...current];
+
+  newItems.forEach(item => {
+    if (!merged.includes(item)) {
+      merged.push(item);
+    }
+  });
+
+  saveIngredients(merged);
+  input.value = "";
+  message.textContent = "";
+  renderIngredients();
+}
+
+function clearIngredients() {
+  saveIngredients([]);
+  renderIngredients();
+
+  const results = document.getElementById("results");
+  const providedTags = document.getElementById("providedTags");
+  const message = document.getElementById("message");
+  const ingredientMessage = document.getElementById("ingredientMessage");
+
+  if (results) results.innerHTML = "";
+  if (providedTags) providedTags.innerHTML = "";
+  if (message) message.textContent = "";
+  if (ingredientMessage) ingredientMessage.textContent = "";
+}
+
 function renderQuickTracker() {
   const totalEl = document.getElementById("todayCalories");
   const goalEl = document.getElementById("todayGoal");
   const statusEl = document.getElementById("todayStatus");
   const listEl = document.getElementById("todayLogEntries");
 
-  if (!totalEl || !goalEl || !statusEl || !listEl) {
-    return;
-  }
+  if (!totalEl || !goalEl || !statusEl || !listEl) return;
 
   const entries = loadLog();
   const total = entries.reduce((sum, item) => sum + caloriesToNumber(item.calories), 0);
@@ -149,7 +239,7 @@ function renderQuickTracker() {
     li.className = "log-item";
     li.innerHTML = `
       <span>${escapeHtml(entry.title)} — ${escapeHtml(entry.calories)}</span>
-      <button class="delete-btn" data-index="${index}">Remove</button>
+      <button type="button" class="delete-btn" data-index="${index}">Remove</button>
     `;
     listEl.appendChild(li);
   });
@@ -170,18 +260,15 @@ function renderTrackerPage() {
   const goalStatus = document.getElementById("goalStatus");
   const logEntries = document.getElementById("logEntries");
 
-  if (!totalEl || !goalDisplay || !goalStatus || !logEntries) {
-    return;
-  }
+  if (!totalEl || !goalDisplay || !goalStatus || !logEntries) return;
 
   const entries = loadLog();
   const total = entries.reduce((sum, item) => sum + caloriesToNumber(item.calories), 0);
   const goal = Number(loadGoal() || 0);
+  const status = getGoalStatus(total, goal);
 
   totalEl.textContent = total;
   goalDisplay.textContent = goal || "Not set";
-
-  const status = getGoalStatus(total, goal);
   goalStatus.textContent = status.text;
   goalStatus.className = status.className;
 
@@ -195,7 +282,7 @@ function renderTrackerPage() {
       li.className = "log-item";
       li.innerHTML = `
         <span>${escapeHtml(entry.title)} — ${escapeHtml(entry.calories)}</span>
-        <button class="delete-btn" data-index="${index}">Remove</button>
+        <button type="button" class="delete-btn" data-index="${index}">Remove</button>
       `;
       logEntries.appendChild(li);
     });
@@ -216,14 +303,12 @@ function renderTrackerPage() {
 
 function renderHistory() {
   const historyList = document.getElementById("historyList");
-  if (!historyList) {
-    return;
-  }
+  if (!historyList) return;
 
   const history = loadHistory();
-  historyList.innerHTML = "";
-
   const items = Object.values(history).sort((a, b) => b.date.localeCompare(a.date));
+
+  historyList.innerHTML = "";
 
   if (!items.length) {
     historyList.innerHTML = "<p>No history yet.</p>";
@@ -232,9 +317,9 @@ function renderHistory() {
 
   items.forEach(item => {
     const status = getGoalStatus(item.total, item.goal);
-    const div = document.createElement("div");
-    div.className = "history-item";
-    div.innerHTML = `
+    const row = document.createElement("div");
+    row.className = "history-item";
+    row.innerHTML = `
       <span>
         <strong>${escapeHtml(item.date)}</strong> —
         ${item.total} calories |
@@ -242,7 +327,7 @@ function renderHistory() {
         <span class="${status.className}">${escapeHtml(status.text)}</span>
       </span>
     `;
-    historyList.appendChild(div);
+    historyList.appendChild(row);
   });
 }
 
@@ -263,9 +348,7 @@ function renderProfile() {
   profileNameDisplay.textContent = profile.name || "Not set";
   profileNameInput.value = profile.name || "";
   savedRecipeCount.textContent = savedRecipes.length;
-
-  const totalSavedCalories = savedRecipes.reduce((sum, recipe) => sum + caloriesToNumber(recipe.calories), 0);
-  savedRecipeCalories.textContent = totalSavedCalories;
+  savedRecipeCalories.textContent = savedRecipes.reduce((sum, recipe) => sum + caloriesToNumber(recipe.calories), 0);
 
   savedRecipesList.innerHTML = "";
 
@@ -283,7 +366,7 @@ function renderProfile() {
       ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
       <p><strong>Used ingredients:</strong> ${(recipe.usedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
       <p><strong>Missing ingredients:</strong> ${(recipe.missedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
-      <button class="delete-btn" data-index="${index}">Remove Saved Recipe</button>
+      <button type="button" class="delete-btn" data-index="${index}">Remove Saved Recipe</button>
     `;
     savedRecipesList.appendChild(card);
   });
@@ -296,79 +379,6 @@ function renderProfile() {
       renderProfile();
     });
   });
-}
-
-function renderIngredients() {
-  const ingredientChips = document.getElementById("ingredientChips");
-  if (!ingredientChips) {
-    return;
-  }
-
-  const ingredients = loadIngredients();
-  ingredientChips.innerHTML = "";
-
-  if (!ingredients.length) {
-    ingredientChips.innerHTML = "<p>No ingredients added yet.</p>";
-    return;
-  }
-
-  ingredients.forEach((ingredient, index) => {
-    const chip = document.createElement("div");
-    chip.className = "chip";
-    chip.innerHTML = `
-      <span>${escapeHtml(ingredient)}</span>
-      <button class="remove-chip-btn" data-index="${index}">×</button>
-    `;
-    ingredientChips.appendChild(chip);
-  });
-
-  ingredientChips.querySelectorAll(".remove-chip-btn").forEach(button => {
-    button.addEventListener("click", () => {
-      const ingredients = loadIngredients();
-      ingredients.splice(Number(button.dataset.index), 1);
-      saveIngredients(ingredients);
-      renderIngredients();
-    });
-  });
-}
-
-function addIngredient() {
-  const input = document.getElementById("ingredientInput");
-  const message = document.getElementById("ingredientMessage");
-
-  if (!input || !message) {
-    return;
-  }
-
-  const value = input.value.trim().toLowerCase();
-  if (!value) {
-    message.textContent = "Enter an ingredient first.";
-    return;
-  }
-
-  const ingredients = loadIngredients();
-  if (ingredients.includes(value)) {
-    message.textContent = "That ingredient is already added.";
-    input.value = "";
-    return;
-  }
-
-  ingredients.push(value);
-  saveIngredients(ingredients);
-  input.value = "";
-  message.textContent = "";
-  renderIngredients();
-}
-
-function clearIngredients() {
-  saveIngredients([]);
-  renderIngredients();
-  const results = document.getElementById("results");
-  const providedTags = document.getElementById("providedTags");
-  const message = document.getElementById("message");
-  if (results) results.innerHTML = "";
-  if (providedTags) providedTags.innerHTML = "";
-  if (message) message.textContent = "";
 }
 
 function addToLog(recipe) {
@@ -388,9 +398,7 @@ function saveRecipeToProfile(recipe) {
   const savedRecipes = loadSavedRecipes();
   const alreadySaved = savedRecipes.some(r => String(r.id) === String(recipe.id));
 
-  if (alreadySaved) {
-    return;
-  }
+  if (alreadySaved) return;
 
   savedRecipes.unshift(recipe);
   saveSavedRecipes(savedRecipes);
@@ -403,9 +411,7 @@ async function searchRecipes() {
   const results = document.getElementById("results");
   const providedTags = document.getElementById("providedTags");
 
-  if (!message || !results || !providedTags) {
-    return;
-  }
+  if (!message || !results || !providedTags) return;
 
   message.textContent = "";
   results.innerHTML = "";
@@ -469,8 +475,8 @@ async function searchRecipes() {
         </details>
         ${recipe.sourceUrl ? `<a class="source-link" href="${recipe.sourceUrl}" target="_blank" rel="noopener noreferrer">Open full recipe</a>` : ""}
         <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
-          <button class="add-btn">Add to daily tracker</button>
-          <button class="secondary-btn save-recipe-btn">Save to profile</button>
+          <button type="button" class="add-btn">Add to daily tracker</button>
+          <button type="button" class="secondary-btn save-recipe-btn">Save to profile</button>
         </div>
       `;
 
@@ -483,28 +489,28 @@ async function searchRecipes() {
   }
 }
 
-function wirePageEvents() {
-  const addIngredientBtn = document.getElementById("addIngredientBtn");
+function wireEvents() {
+  const addIngredientsBtn = document.getElementById("addIngredientsBtn");
   const clearIngredientsBtn = document.getElementById("clearIngredientsBtn");
-  const ingredientInput = document.getElementById("ingredientInput");
+  const ingredientsInput = document.getElementById("ingredientsInput");
   const searchBtn = document.getElementById("searchBtn");
   const clearLogBtn = document.getElementById("clearLogBtn");
   const saveGoalBtn = document.getElementById("saveGoalBtn");
   const saveProfileBtn = document.getElementById("saveProfileBtn");
 
-  if (addIngredientBtn) {
-    addIngredientBtn.addEventListener("click", addIngredient);
+  if (addIngredientsBtn) {
+    addIngredientsBtn.addEventListener("click", addIngredientsFromInput);
   }
 
   if (clearIngredientsBtn) {
     clearIngredientsBtn.addEventListener("click", clearIngredients);
   }
 
-  if (ingredientInput) {
-    ingredientInput.addEventListener("keydown", (event) => {
+  if (ingredientsInput) {
+    ingredientsInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
-        addIngredient();
+        addIngredientsFromInput();
       }
     });
   }
@@ -551,14 +557,14 @@ function wirePageEvents() {
   }
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("DOMContentLoaded", () => {
   const goalInput = document.getElementById("goalInput");
   const goal = loadGoal();
   if (goalInput && goal) {
     goalInput.value = goal;
   }
 
-  wirePageEvents();
+  wireEvents();
   renderIngredients();
   renderQuickTracker();
   renderTrackerPage();
