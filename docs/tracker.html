@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Full Calorie Tracker</title>
+  <title>Calorie Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./style.css">
 </head>
@@ -10,12 +10,13 @@
   <div class="container">
     <header class="topbar">
       <div>
-        <h1>Full Calorie Tracker</h1>
-        <p class="subtitle">Manage your goals, history, and saved recipes.</p>
+        <h1>Calorie Tracker</h1>
+        <p class="subtitle">Manage your goals and calorie history.</p>
       </div>
       <nav class="nav-links">
         <a class="nav-link" href="./index.html">Recipe Finder</a>
-        <a class="nav-link active" href="./tracker.html">Full Calorie Tracker</a>
+        <a class="nav-link active" href="./tracker.html">Calorie Tracker</a>
+        <a class="nav-link" href="./profile.html">Profile</a>
       </nav>
     </header>
 
@@ -38,23 +39,6 @@
     <section class="panel">
       <h2>History</h2>
       <div id="historyList" class="history-list"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Profile</h2>
-      <div class="profile-box">
-        <input id="profileName" type="text" placeholder="Enter your name">
-        <button id="saveProfileBtn" type="button">Save Profile</button>
-      </div>
-
-      <div class="profile-card">
-        <p><strong>Name:</strong> <span id="profileNameDisplay">Not set</span></p>
-        <p><strong>Saved Recipes:</strong> <span id="savedRecipeCount">0</span></p>
-        <p><strong>Total Saved Recipe Calories:</strong> <span id="savedRecipeCalories">0</span></p>
-      </div>
-
-      <h3>Saved Recipes</h3>
-      <div id="savedRecipesList" class="results"></div>
     </section>
   </div>
 
