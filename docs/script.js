@@ -119,8 +119,8 @@ function getGoalStatus(total, goal) {
     };
   }
 
-  // 🟡 NEW: within 50 calories below goal
-  if (diff > 0 && diff <= 50) {
+  // 🟡 NEW: within 100 calories below goal
+  if (diff > 0 && diff <= 100) {
     return {
       text: `Very close! Only ${diff} calories below goal`,
       className: "status-warning"
