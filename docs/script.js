@@ -102,13 +102,36 @@ function getGoalStatus(total, goal) {
   if (!goal) {
     return { text: "No goal set", className: "" };
   }
+
+  const diff = goal - total;
+
   if (total > goal) {
-    return { text: `Above goal by ${total - goal} calories`, className: "status-above" };
+    return {
+      text: `Above goal by ${total - goal} calories`,
+      className: "status-above"
+    };
   }
-  if (total < goal) {
-    return { text: `Below goal by ${goal - total} calories`, className: "status-below" };
+
+  if (diff === 0) {
+    return {
+      text: "Met goal exactly",
+      className: "status-equal"
+    };
   }
-  return { text: "Met goal exactly", className: "status-equal" };
+
+  // 🟡 NEW: within 50 calories below goal
+  if (diff > 0 && diff <= 50) {
+    return {
+      text: `Very close! Only ${diff} calories below goal`,
+      className: "status-warning"
+    };
+  }
+
+  // 🟢 normal below
+  return {
+    text: `Below goal by ${diff} calories`,
+    className: "status-below"
+  };
 }
 
 function saveTodayToHistory() {

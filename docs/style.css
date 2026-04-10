@@ -219,6 +219,10 @@ button {
   color: #dc2626;
   font-weight: bold;
 }
+.status-warning {
+  color: #eab308; /* yellow */
+  font-weight: bold;
+}
 
 .status-below {
   color: #16a34a;
