@@ -353,15 +353,14 @@ function renderHistory() {
 
     const row = document.createElement("div");
     row.className = "history-card";
+
     row.innerHTML = `
       <details class="history-details" ${index === 0 ? "open" : ""}>
         <summary class="history-summary-row">
-          <span class="history-summary-main">
-            <strong>${escapeHtml(item.date)}</strong>
-            <span>
-              ${item.total} calories | Goal: ${item.goal || "Not set"} |
-              <span class="${status.className}">${escapeHtml(status.text)}</span>
-            </span>
+          <strong>${escapeHtml(item.date)}</strong>
+          <span>
+            ${item.total} calories | Goal: ${item.goal || "Not set"} |
+            <span class="${status.className}">${escapeHtml(status.text)}</span>
           </span>
         </summary>
 
@@ -373,6 +372,7 @@ function renderHistory() {
         </div>
       </details>
     `;
+
     historyList.appendChild(row);
   });
 }
