@@ -143,7 +143,11 @@ function saveTodayToHistory() {
   history[todayKey()] = {
     date: todayKey().replace("calorie-log-", ""),
     total,
-    goal
+    goal,
+    recipes: entries.map(item => ({
+      title: item.title,
+      calories: item.calories
+    }))
   };
   saveHistory(history);
 }
@@ -338,17 +342,36 @@ function renderHistory() {
     return;
   }
 
-  items.forEach(item => {
+  items.forEach((item, index) => {
     const status = getGoalStatus(item.total, item.goal);
+
+    const recipeList = (item.recipes && item.recipes.length)
+      ? item.recipes.map(recipe =>
+          `<li>${escapeHtml(recipe.title)} — ${escapeHtml(recipe.calories)}</li>`
+        ).join("")
+      : "<li>No recipes tracked</li>";
+
     const row = document.createElement("div");
-    row.className = "history-item";
+    row.className = "history-card";
     row.innerHTML = `
-      <span>
-        <strong>${escapeHtml(item.date)}</strong> —
-        ${item.total} calories |
-        Goal: ${item.goal || "Not set"} |
-        <span class="${status.className}">${escapeHtml(status.text)}</span>
-      </span>
+      <details class="history-details" ${index === 0 ? "open" : ""}>
+        <summary class="history-summary-row">
+          <span class="history-summary-main">
+            <strong>${escapeHtml(item.date)}</strong>
+            <span>
+              ${item.total} calories | Goal: ${item.goal || "Not set"} |
+              <span class="${status.className}">${escapeHtml(status.text)}</span>
+            </span>
+          </span>
+        </summary>
+
+        <div class="history-recipes">
+          <strong>Recipes tracked:</strong>
+          <ul class="history-recipe-list">
+            ${recipeList}
+          </ul>
+        </div>
+      </details>
     `;
     historyList.appendChild(row);
   });
