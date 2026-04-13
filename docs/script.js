@@ -520,6 +520,8 @@ function wireEvents() {
   const clearLogBtn = document.getElementById("clearLogBtn");
   const saveGoalBtn = document.getElementById("saveGoalBtn");
   const saveProfileBtn = document.getElementById("saveProfileBtn");
+  const wakeApiBtn = document.getElementById("wakeApiBtn");
+
 
   if (addIngredientsBtn) {
     addIngredientsBtn.addEventListener("click", addIngredientsFromInput);
@@ -578,6 +580,11 @@ function wireEvents() {
       renderProfile();
     });
   }
+
+  if (wakeApiBtn) {
+      wakeApiBtn.addEventListener("click", wakeApi);
+  }
+
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -593,4 +600,25 @@ window.addEventListener("DOMContentLoaded", () => {
   renderTrackerPage();
   renderHistory();
   renderProfile();
+  wakeApi();
 });
+
+async function wakeApi() {
+  const statusEl = document.getElementById("apiStatus");
+  if (!statusEl) return;
+
+  statusEl.textContent = "Waking API...";
+
+  try {
+    const response = await fetch(API_BASE);
+    const data = await response.json();
+
+    if (response.ok) {
+      statusEl.textContent = "API is awake ✅";
+    } else {
+      statusEl.textContent = "API responded but may have issues ⚠️";
+    }
+  } catch (err) {
+    statusEl.textContent = "Failed to reach API ❌";
+  }
+}

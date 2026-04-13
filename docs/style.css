@@ -248,3 +248,9 @@ button {
   border-bottom: 2px solid #e5e7eb;
   letter-spacing: 1px;
 }
+.api-wake {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
