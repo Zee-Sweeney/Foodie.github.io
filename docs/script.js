@@ -403,31 +403,46 @@ function renderProfile() {
     return;
   }
 
-  savedRecipes.forEach((recipe, index) => {
-    const card = document.createElement("div");
-    card.className = "recipe-card";
-    card.innerHTML = `
-  <h3>${escapeHtml(recipe.title)}</h3>
-  <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
+savedRecipes.forEach((recipe, index) => {
+  const usedIngredients = Array.isArray(recipe.usedIngredients)
+    ? recipe.usedIngredients
+    : [];
 
-  ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
+  const missedIngredients = Array.isArray(recipe.missedIngredients)
+    ? recipe.missedIngredients
+    : [];
 
-  <p><strong>Used ingredients:</strong> ${(recipe.usedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
-  <p><strong>Missing ingredients:</strong> ${(recipe.missedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
+  const usedText = usedIngredients.length
+    ? usedIngredients.map(escapeHtml).join(", ")
+    : "None";
 
-  <details class="instructions-dropdown">
-    <summary>View Instructions</summary>
-    <div class="instructions">
-      ${recipe.instructions || "No instructions available."}
-    </div>
-  </details>
+  const missedText = missedIngredients.length
+    ? missedIngredients.map(escapeHtml).join(", ")
+    : "None";
 
-  <button type="button" class="delete-btn" data-index="${index}">
-    Remove Saved Recipe
-  </button>
-`;
-    savedRecipesList.appendChild(card);
-  });
+  const card = document.createElement("div");
+  card.className = "recipe-card";
+  card.innerHTML = `
+    <h3>${escapeHtml(recipe.title)}</h3>
+    <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
+    ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
+
+    <p><strong>Used ingredients:</strong> ${usedText}</p>
+    <p><strong>Missing ingredients:</strong> ${missedText}</p>
+
+    <details class="instructions-dropdown">
+      <summary>View Instructions</summary>
+      <div class="instructions">
+        ${recipe.instructions || "No instructions available."}
+      </div>
+    </details>
+
+    <button type="button" class="delete-btn" data-index="${index}">
+      Remove Saved Recipe
+    </button>
+  `;
+  savedRecipesList.appendChild(card);
+});
 
   savedRecipesList.querySelectorAll(".delete-btn").forEach(button => {
     button.addEventListener("click", () => {
@@ -460,11 +475,15 @@ function saveRecipeToProfile(recipe) {
 
   savedRecipes.unshift({
     id: recipe.id,
-    title: recipe.title,
-    calories: recipe.calories,
-    image: recipe.image,
-    usedIngredients: recipe.usedIngredients,
-    missedIngredients: recipe.missedIngredients,
+    title: recipe.title || "Untitled Recipe",
+    calories: recipe.calories || "0 kcal",
+    image: recipe.image || "",
+    usedIngredients: Array.isArray(recipe.usedIngredients)
+      ? recipe.usedIngredients.filter(item => typeof item === "string" && item.trim() !== "")
+      : [],
+    missedIngredients: Array.isArray(recipe.missedIngredients)
+      ? recipe.missedIngredients.filter(item => typeof item === "string" && item.trim() !== "")
+      : [],
     instructions: recipe.instructions || "No instructions available."
   });
 
