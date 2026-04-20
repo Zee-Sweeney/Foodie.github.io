@@ -537,13 +537,13 @@ async function searchRecipes() {
     }
 
     data.results.forEach(recipe => {
-      const used = recipe.usedIngredients.length
-        ? recipe.usedIngredients.map(escapeHtml).join(", ")
-        : "None";
+      const used = Array.isArray(recipe.usedIngredients) && recipe.usedIngredients.length
+      ? recipe.usedIngredients.map(escapeHtml).join(", ")
+      : "None";
 
-      const missed = recipe.missedIngredients.length
-        ? recipe.missedIngredients.map(escapeHtml).join(", ")
-        : "None";
+      const missed = Array.isArray(recipe.missedIngredients) && recipe.missedIngredients.length
+      ? recipe.missedIngredients.map(escapeHtml).join(", ")
+      : "None";
 
       const safeTitle = escapeHtml(recipe.title);
 

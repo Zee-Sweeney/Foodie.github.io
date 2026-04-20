@@ -64,20 +64,36 @@ def search():
                     calories = f"{round(nutrient.get('amount', 0))} {nutrient.get('unit', 'kcal')}"
                     break
 
+            used_ingredients = []
+            for ingredient in recipe.get("usedIngredients", []):
+                name = ingredient.get("name", "").strip()
+                if name:
+                    used_ingredients.append(name)
+
+            missed_ingredients = []
+            for ingredient in recipe.get("missedIngredients", []):
+                name = ingredient.get("name", "").strip()
+                if name:
+                    missed_ingredients.append(name)
+
             results.append({
                 "id": recipe_id,
                 "title": recipe.get("title", "Untitled Recipe"),
                 "image": recipe.get("image"),
-                "usedIngredients": [i.get("name", "") for i in recipe.get("usedIngredients", [])],
-                "missedIngredients": [i.get("name", "") for i in recipe.get("missedIngredients", [])],
+                "usedIngredients": used_ingredients,
+                "missedIngredients": missed_ingredients,
                 "instructions": info.get("instructions") or "No instructions available.",
                 "sourceUrl": info.get("sourceUrl") or "",
                 "calories": calories
             })
+
         except requests.RequestException:
             continue
 
-    return jsonify({"provided": provided, "results": results})
+    return jsonify({
+        "provided": provided,
+        "results": results
+    })
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
