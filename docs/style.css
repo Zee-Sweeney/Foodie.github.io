@@ -310,3 +310,19 @@ button {
   margin: 8px 0 0 20px;
   padding: 0;
 }
+.instructions-dropdown {
+  margin-top: 10px;
+}
+
+.instructions-dropdown summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: #2563eb;
+}
+
+.instructions {
+  margin-top: 8px;
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+}

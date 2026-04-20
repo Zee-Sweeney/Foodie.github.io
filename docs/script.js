@@ -407,13 +407,25 @@ function renderProfile() {
     const card = document.createElement("div");
     card.className = "recipe-card";
     card.innerHTML = `
-      <h3>${escapeHtml(recipe.title)}</h3>
-      <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
-      ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
-      <p><strong>Used ingredients:</strong> ${(recipe.usedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
-      <p><strong>Missing ingredients:</strong> ${(recipe.missedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
-      <button type="button" class="delete-btn" data-index="${index}">Remove Saved Recipe</button>
-    `;
+  <h3>${escapeHtml(recipe.title)}</h3>
+  <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
+
+  ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
+
+  <p><strong>Used ingredients:</strong> ${(recipe.usedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
+  <p><strong>Missing ingredients:</strong> ${(recipe.missedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
+
+  <details class="instructions-dropdown">
+    <summary>View Instructions</summary>
+    <div class="instructions">
+      ${recipe.instructions || "No instructions available."}
+    </div>
+  </details>
+
+  <button type="button" class="delete-btn" data-index="${index}">
+    Remove Saved Recipe
+  </button>
+`;
     savedRecipesList.appendChild(card);
   });
 
@@ -442,11 +454,20 @@ function addToLog(recipe) {
 
 function saveRecipeToProfile(recipe) {
   const savedRecipes = loadSavedRecipes();
-  const alreadySaved = savedRecipes.some(r => String(r.id) === String(recipe.id));
 
+  const alreadySaved = savedRecipes.some(r => String(r.id) === String(recipe.id));
   if (alreadySaved) return;
 
-  savedRecipes.unshift(recipe);
+  savedRecipes.unshift({
+    id: recipe.id,
+    title: recipe.title,
+    calories: recipe.calories,
+    image: recipe.image,
+    usedIngredients: recipe.usedIngredients,
+    missedIngredients: recipe.missedIngredients,
+    instructions: recipe.instructions || "No instructions available."
+  });
+
   saveSavedRecipes(savedRecipes);
   renderProfile();
 }
