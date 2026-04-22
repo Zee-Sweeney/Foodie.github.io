@@ -422,36 +422,47 @@ savedRecipes.forEach((recipe, index) => {
 
   const card = document.createElement("div");
   card.className = "recipe-card";
-  card.innerHTML = `
-    <h3>${escapeHtml(recipe.title)}</h3>
-    <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
-    ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
+ card.innerHTML = `
+  <h3>${escapeHtml(recipe.title)}</h3>
+  <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
 
-    <p><strong>Used ingredients:</strong> ${usedText}</p>
-    <p><strong>Missing ingredients:</strong> ${missedText}</p>
+  ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
 
-    <details class="instructions-dropdown">
-      <summary>View Instructions</summary>
-      <div class="instructions">
-        ${recipe.instructions || "No instructions available."}
-      </div>
-    </details>
+  <p><strong>Used ingredients:</strong> ${(recipe.usedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
+  <p><strong>Missing ingredients:</strong> ${(recipe.missedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
 
-    <button type="button" class="delete-btn" data-index="${index}">
-      Remove Saved Recipe
-    </button>
-  `;
+  <details class="instructions-dropdown">
+    <summary>View Instructions</summary>
+    <div class="instructions">
+      ${recipe.instructions || "No instructions available."}
+    </div>
+  </details>
+
+  <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <button type="button" class="add-btn">Add to Daily Tracker</button>
+    <button type="button" class="delete-btn">Remove Saved Recipe</button>
+  </div>
+`;
+
+  card.querySelector(".add-btn").addEventListener("click", () => {
+    addToLog({
+      id: recipe.id,
+      title: recipe.title,
+      calories: recipe.calories
+    });
+  });
+
+
+  card.querySelector(".delete-btn").addEventListener("click", () => {
+    const savedRecipes = loadSavedRecipes();
+    savedRecipes.splice(index, 1);
+    saveSavedRecipes(savedRecipes);
+    renderProfile();
+  });
   savedRecipesList.appendChild(card);
 });
 
-  savedRecipesList.querySelectorAll(".delete-btn").forEach(button => {
-    button.addEventListener("click", () => {
-      const savedRecipes = loadSavedRecipes();
-      savedRecipes.splice(Number(button.dataset.index), 1);
-      saveSavedRecipes(savedRecipes);
-      renderProfile();
-    });
-  });
+;
 }
 
 function addToLog(recipe) {
@@ -467,11 +478,24 @@ function addToLog(recipe) {
   renderHistory();
 }
 
-function saveRecipeToProfile(recipe) {
+function saveRecipeToProfile(recipe, button = null) {
   const savedRecipes = loadSavedRecipes();
 
   const alreadySaved = savedRecipes.some(r => String(r.id) === String(recipe.id));
-  if (alreadySaved) return;
+
+  if (alreadySaved) {
+    if (button) {
+      const oldText = button.textContent;
+      button.textContent = "Already Saved";
+      button.disabled = true;
+
+      setTimeout(() => {
+        button.textContent = oldText;
+        button.disabled = false;
+      }, 1200);
+    }
+    return;
+  }
 
   savedRecipes.unshift({
     id: recipe.id,
@@ -489,6 +513,17 @@ function saveRecipeToProfile(recipe) {
 
   saveSavedRecipes(savedRecipes);
   renderProfile();
+
+  if (button) {
+    const oldText = button.textContent;
+    button.textContent = "Added ✅";
+    button.disabled = true;
+
+    setTimeout(() => {
+      button.textContent = oldText;
+      button.disabled = false;
+    }, 1200);
+  }
 }
 
 async function searchRecipes() {
@@ -496,6 +531,7 @@ async function searchRecipes() {
   const message = document.getElementById("message");
   const results = document.getElementById("results");
   const providedTags = document.getElementById("providedTags");
+  const saveButton = card.querySelector(".save-recipe-btn");
 
   if (!message || !results || !providedTags) return;
 
@@ -567,7 +603,7 @@ async function searchRecipes() {
       `;
 
       card.querySelector(".add-btn").addEventListener("click", () => addToLog(recipe));
-      card.querySelector(".save-recipe-btn").addEventListener("click", () => saveRecipeToProfile(recipe));
+      saveButton.addEventListener("click", () => saveRecipeToProfile(recipe, saveButton));
       results.appendChild(card);
     });
   } catch (error) {

@@ -326,3 +326,7 @@ button {
   background: #f9fafb;
   border-radius: 8px;
 }
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
