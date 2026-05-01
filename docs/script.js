@@ -377,6 +377,18 @@ function renderHistory() {
   });
 }
 
+function cleanIngredients(arr) {
+  if (!Array.isArray(arr)) return [];
+
+  return arr
+    .map(item => String(item).trim())
+    .filter(item => item)
+    .map(item => item.split(" - ")[0].split(" – ")[0].split(". ")[0].trim())
+    .filter(item => item && item.length < 40);
+}
+
+
+
 function renderProfile() {
   const profileNameDisplay = document.getElementById("profileNameDisplay");
   const profileNameInput = document.getElementById("profileName");
@@ -403,14 +415,9 @@ function renderProfile() {
     return;
   }
 
-savedRecipes.forEach((recipe, index) => {
-  const usedIngredients = Array.isArray(recipe.usedIngredients)
-    ? recipe.usedIngredients
-    : [];
-
-  const missedIngredients = Array.isArray(recipe.missedIngredients)
-    ? recipe.missedIngredients
-    : [];
+  savedRecipes.forEach((recipe, index) => {
+  const usedIngredients = cleanIngredients(recipe.usedIngredients);
+  const missedIngredients = cleanIngredients(recipe.missedIngredients);
 
   const usedText = usedIngredients.length
     ? usedIngredients.map(escapeHtml).join(", ")
@@ -422,27 +429,28 @@ savedRecipes.forEach((recipe, index) => {
 
   const card = document.createElement("div");
   card.className = "recipe-card";
- card.innerHTML = `
-  <h3>${escapeHtml(recipe.title)}</h3>
-  <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
 
-  ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
+  card.innerHTML = `
+    <h3>${escapeHtml(recipe.title)}</h3>
+    <div class="recipe-meta">${escapeHtml(recipe.calories)}</div>
 
-  <p><strong>Used ingredients:</strong> ${(recipe.usedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
-  <p><strong>Missing ingredients:</strong> ${(recipe.missedIngredients || []).map(escapeHtml).join(", ") || "None"}</p>
+    ${recipe.image ? `<img src="${recipe.image}" alt="${escapeHtml(recipe.title)}">` : ""}
 
-  <details class="instructions-dropdown">
-    <summary>View Instructions</summary>
-    <div class="instructions">
-      ${recipe.instructions || "No instructions available."}
+    <p><strong>Used ingredients:</strong> ${usedText}</p>
+    <p><strong>Missing ingredients:</strong> ${missedText}</p>
+
+    <details class="instructions-dropdown">
+      <summary>View Instructions</summary>
+      <div class="instructions">
+        ${recipe.instructions || "No instructions available."}
+      </div>
+    </details>
+
+    <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" class="add-btn">Add to Daily Tracker</button>
+      <button type="button" class="delete-btn">Remove Saved Recipe</button>
     </div>
-  </details>
-
-  <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
-    <button type="button" class="add-btn">Add to Daily Tracker</button>
-    <button type="button" class="delete-btn">Remove Saved Recipe</button>
-  </div>
-`;
+  `;
 
   card.querySelector(".add-btn").addEventListener("click", () => {
     addToLog({
@@ -452,13 +460,13 @@ savedRecipes.forEach((recipe, index) => {
     });
   });
 
-
   card.querySelector(".delete-btn").addEventListener("click", () => {
     const savedRecipes = loadSavedRecipes();
     savedRecipes.splice(index, 1);
     saveSavedRecipes(savedRecipes);
     renderProfile();
   });
+
   savedRecipesList.appendChild(card);
 });
 
@@ -531,7 +539,7 @@ async function searchRecipes() {
   const message = document.getElementById("message");
   const results = document.getElementById("results");
   const providedTags = document.getElementById("providedTags");
-  const saveButton = card.querySelector(".save-recipe-btn");
+  
 
   if (!message || !results || !providedTags) return;
 
@@ -603,7 +611,10 @@ async function searchRecipes() {
       `;
 
       card.querySelector(".add-btn").addEventListener("click", () => addToLog(recipe));
+
+      const saveButton = card.querySelector(".save-recipe-btn");
       saveButton.addEventListener("click", () => saveRecipeToProfile(recipe, saveButton));
+
       results.appendChild(card);
     });
   } catch (error) {
