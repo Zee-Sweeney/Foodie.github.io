@@ -387,7 +387,17 @@ function cleanIngredients(arr) {
     .filter(item => item && item.length < 40);
 }
 
+function renderGreeting() {
+  const greetingEl = document.getElementById("greetingText");
+  if (!greetingEl) return;
 
+  const profile = loadProfile();
+  const name = profile.name?.trim();
+
+  greetingEl.textContent = name
+    ? `Hello ${name} 👋`
+    : "Hello 👋";
+}
 
 function renderProfile() {
   const profileNameDisplay = document.getElementById("profileNameDisplay");
@@ -710,6 +720,7 @@ window.addEventListener("DOMContentLoaded", () => {
   renderTrackerPage();
   renderHistory();
   renderProfile();
+  renderGreeting();
   wakeApi();
 });
 
