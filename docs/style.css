@@ -330,3 +330,16 @@ button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+.greeting-wrapper {
+  width: 100%;
+  text-align: center;
+  background: #f5f7fb;
+}
+
+.greeting-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #374151;
+  margin: 16px 0;
+}
